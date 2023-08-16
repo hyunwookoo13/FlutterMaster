@@ -11,7 +11,11 @@ class HomePage extends StatelessWidget {
       backgroundColor: Colors.deepPurple[200],
       body: Center(
         child: AvatarGlow(
-          child: Icon(Icons.menu, color: Colors.white, size:40),
+          child: CircleAvatar(
+            radius: 55,
+            backgroundColor: Colors.orangeAccent,
+            backgroundImage: AssetImage('assets/images/myAvatar.jpeg'),
+          ),
           endRadius: 100,
           glowColor: Colors.deepPurple,
           duration: Duration(milliseconds: 2000),
