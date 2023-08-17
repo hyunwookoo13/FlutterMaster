@@ -1,5 +1,5 @@
 import 'package:avatar_glow/avatar_glow.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:avatar_glow_package/game/coconut_game_page.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -10,16 +10,21 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.deepPurple[200],
       body: Center(
-        child: AvatarGlow(
-          child: CircleAvatar(
-            radius: 55,
-            backgroundColor: Colors.orangeAccent,
-            backgroundImage: AssetImage('assets/images/myAvatar.jpeg'),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const CoconutGamePage()));
+          },
+          child: const AvatarGlow(
+            endRadius: 100,
+            glowColor: Colors.deepPurple,
+            duration: Duration(milliseconds: 2000),
+            repeatPauseDuration: Duration(milliseconds: 100),
+            child: CircleAvatar(
+              radius: 55,
+              backgroundColor: Colors.orangeAccent,
+              backgroundImage: AssetImage('assets/images/myAvatar.jpeg'),
+            ),
           ),
-          endRadius: 100,
-          glowColor: Colors.deepPurple,
-          duration: Duration(milliseconds: 2000),
-          repeatPauseDuration: Duration(milliseconds: 100),
         ),
       ),
     );
