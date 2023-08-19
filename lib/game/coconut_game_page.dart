@@ -48,16 +48,13 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
     Timer.periodic(const Duration(milliseconds: 20), (timer) {
       if (!gamePaused) {
         setState(() {
-          playerPosition += 0.005;
-          if (playerPosition > 1.0) {
-            playerPosition = 1.0;
-          }
           updateCoconutsAndBombs();
           checkCollisions();
         });
       }
     });
   }
+
 
   void resetGame() {
     playerPosition = 0.5;
@@ -90,16 +87,16 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
     }
 
     for (int i = 0; i < coconuts.length; i++) {
-      coconuts[i].updatePosition();
+      coconuts[i].updatePosition(boundaryHeight,coconutHeight,boundaryWidth,coconutWidth);
     }
 
     for (int i = 0; i < bombs.length; i++) {
-      bombs[i].updatePosition();
+      bombs[i].updatePosition(boundaryHeight,coconutHeight,boundaryWidth,coconutWidth);
     }
 
     // Remove off-screen coconuts and bombs
-    coconuts.removeWhere((coconut) => coconut.y > 600);
-    bombs.removeWhere((bomb) => bomb.y > 600);
+    coconuts.removeWhere((coconut) => coconut.y >= 490);
+    bombs.removeWhere((bomb) => bomb.y >= 490);
   }
 
   void checkCollisions() {
@@ -124,10 +121,10 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
   @override
   void initState() {
     super.initState();
-
+    resetGame();
     Future.delayed(Duration.zero, () {
       calcDeviceSize();
-      //startGame();
+      startGame();
     });
   }
 
@@ -141,7 +138,9 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
       body: GestureDetector(
         onHorizontalDragUpdate: (DragUpdateDetails details) {
           playerPosition += details.delta.dx;
-          if (playerPosition < boundaryPadding - coconutWidth / 2) playerPosition = boundaryPadding - coconutWidth / 2;
+          if (playerPosition < boundaryPadding - coconutWidth / 2) {
+            playerPosition = boundaryPadding - coconutWidth / 2;
+          }
           if (playerPosition > MediaQuery.of(context).size.width - playerWidth - boundaryPadding + coconutWidth / 2) {
             playerPosition = MediaQuery.of(context).size.width - playerWidth - boundaryPadding + coconutWidth / 2;
           }
@@ -149,6 +148,7 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
         },
         child: Stack(
           children: [
+
             AnimatedContainer(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
@@ -167,6 +167,16 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
                   end: Alignment.bottomCenter,
                 ),
               ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Score: $score'),
+                SizedBox(width: 5,),
+                Text('Lives: $lives'),
+                SizedBox(width: 5,),
+                Text('Stage: $stage'),
+              ],
             ),
 
             for (var coconut in coconuts)
@@ -202,16 +212,7 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
                   child: Image.asset('assets/coconut/yaja.png'),
                 ),
               ),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text('Score: $score'),
-                  Text('Lives: $lives'),
-                  Text('Stage: $stage'),
-                ],
-              ),
-            ),
+
           ],
         ),
       ),
@@ -230,8 +231,17 @@ class Coconut {
     speed = 1.0;
   }
 
-  void updatePosition() {
+  void updatePosition(double bH, double cH, double bW, double cW) {
     y += speed;
+    if (y > bH - cH) {
+      y = bH - cH;
+    }
+    if (x < 0) {
+      x = 0;
+    }
+    if (x > bW - cW) {
+      x = bW - cW;
+    }
   }
 }
 
@@ -246,7 +256,16 @@ class Bomb {
     speed = 1.5;
   }
 
-  void updatePosition() {
+  void updatePosition(double bH, double cH, double bW, double cW) {
     y += speed;
+    if (y > bH - cH) {
+      y = bH - cH;
+    }
+    if (x < 0) {
+      x = 0;
+    }
+    if (x > bW - cW) {
+      x = bW - cW;
+    }
   }
 }
