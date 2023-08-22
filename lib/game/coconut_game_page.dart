@@ -55,7 +55,6 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
     });
   }
 
-
   void resetGame() {
     playerPosition = 0.5;
   }
@@ -85,38 +84,57 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
     if (tickCount % bombInterval == 0 && bombs.length < 5) {
       bombs.add(Bomb());
     }
-
+    //double bH, double bW, double cW, double pW, coconutHeight, boundaryPadding
     for (int i = 0; i < coconuts.length; i++) {
-      coconuts[i].updatePosition(boundaryHeight,coconutHeight,boundaryWidth,coconutWidth);
+      coconuts[i].updatePosition();
     }
 
     for (int i = 0; i < bombs.length; i++) {
-      bombs[i].updatePosition(boundaryHeight,coconutHeight,boundaryWidth,coconutWidth);
+      bombs[i].updatePosition();
     }
 
     // Remove off-screen coconuts and bombs
-    coconuts.removeWhere((coconut) => coconut.y >= 490);
-    bombs.removeWhere((bomb) => bomb.y >= 490);
+    coconuts.removeWhere((coconut) => coconut.y >= boundaryHeight-boundaryPadding);
+    bombs.removeWhere((bomb) => bomb.y >= boundaryHeight-boundaryPadding);
   }
 
   void checkCollisions() {
+    print("checkCollisions() called");
     for (int i = 0; i < coconuts.length; i++) {
-      if (coconuts[i].y > 560 && coconuts[i].x == playerPosition) {
-        score++;
+      if (playerPosition <= coconuts[i].x + coconutWidth &&
+          coconuts[i].x <= playerPosition + playerWidth &&
+          coconuts[i].y + coconutHeight <= boundaryHeight &&
+          coconuts[i].y + coconutHeight >= boundaryHeight - playerHeight + 15) {
+        print("충돌!!!");
+        setState(() {
+          score++; // 코코넛을 얻었으므로 점수 증가
+        });
         coconuts.removeAt(i);
+        i--; // 인덱스 감소하여 다음 아이템 처리
       }
+      //print("충돌을 감지할 수 없습니다");
     }
 
     for (int i = 0; i < bombs.length; i++) {
-      if (bombs[i].y > 560 && bombs[i].x == playerPosition) {
-        lives--;
-        if (lives == 0) {
-          // Game over logic
-        }
+      if (bombs[i].y > boundaryHeight - playerHeight &&
+          bombs[i].x >= playerPosition - coconutWidth / 2 &&
+          bombs[i].x <= playerPosition + playerWidth - coconutWidth / 2) {
+        print("충돌!!!");
+        setState(() {
+          lives--; // 폭탄과 충돌했으므로 라이프 감소
+          if (lives == 0) {
+            // Game over logic
+          }
+        });
         bombs.removeAt(i);
+        i--; // 인덱스 감소하여 다음 아이템 처리
       }
+      //print("충돌을 감지할 수 없습니다");
     }
   }
+
+
+
 
   @override
   void initState() {
@@ -125,6 +143,7 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
     Future.delayed(Duration.zero, () {
       calcDeviceSize();
       startGame();
+      checkCollisions();
     });
   }
 
@@ -181,38 +200,37 @@ class _CoconutGamePageState extends State<CoconutGamePage> {
 
             for (var coconut in coconuts)
               Positioned(
-                left: coconut.x * 300,
+                left: coconut.x * 330,
                 top: coconut.y,
                 child: Image.asset(
                   "assets/coconut/sky_coconut.png",
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                 ),
               ),
             for (var bomb in bombs)
               Positioned(
-                left: bomb.x * 300,
+                left: bomb.x * 330,
                 top: bomb.y,
                 child: Image.asset(
                   "assets/coconut/sky_bomb.png",
-                  width: 40,
-                  height: 40,
+                  width: 50,
+                  height: 50,
                 ),
               ),
 
             // 플레이어
             if (!gameOver)
               Positioned(
-                top: boundaryHeight - playerHeight,
+                top: boundaryHeight - (playerHeight+60),
                 left: playerPosition - playerWidth,
                 child: Container(
                   width: playerWidth * 3,
-                  // height: playerHeight * 3,
+                  height: playerHeight*3,
                   color: Colors.transparent,
                   child: Image.asset('assets/coconut/yaja.png'),
                 ),
               ),
-
           ],
         ),
       ),
@@ -231,17 +249,8 @@ class Coconut {
     speed = 1.0;
   }
 
-  void updatePosition(double bH, double cH, double bW, double cW) {
+  void updatePosition() {
     y += speed;
-    if (y > bH - cH) {
-      y = bH - cH;
-    }
-    if (x < 0) {
-      x = 0;
-    }
-    if (x > bW - cW) {
-      x = bW - cW;
-    }
   }
 }
 
@@ -256,16 +265,8 @@ class Bomb {
     speed = 1.5;
   }
 
-  void updatePosition(double bH, double cH, double bW, double cW) {
+  void updatePosition() {
     y += speed;
-    if (y > bH - cH) {
-      y = bH - cH;
-    }
-    if (x < 0) {
-      x = 0;
-    }
-    if (x > bW - cW) {
-      x = bW - cW;
-    }
   }
 }
+
